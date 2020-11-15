@@ -18,7 +18,7 @@ app.get('/users',async(req,res,next)=>{
                 <body>
                     <h1>TO DO TRACKER</h1>
                     <h2>Users</h2>
-                    <ul>
+                    <ul id="user-list">
                     ${
                         users.map(user=>`
                             <li><a href='/users/${user.name}'>${user.name}</a></li>
@@ -26,9 +26,14 @@ app.get('/users',async(req,res,next)=>{
                     }
                     </ul>
                     <form id="user-form" method="POST">
-                        <input type="text" name="name" id="add-user" required/>
+                        <input type="text" name="name" id="add-user" placeholder="User Name" required/>
                         <button>Create New User</button>
                     </form>
+                    
+
+
+
+
                 </body>
             </html>
         `);
@@ -36,6 +41,13 @@ app.get('/users',async(req,res,next)=>{
         next(ex);
     }
 });
+                    // <h4>OR (not working yet)</h4>
+                    // <form id="complete-item-form" method="POST">
+                    //     <input type="text" name="name" id="add-user-full" placeholder="User Name" required/>
+                    //     <input type="text" name="name" id="add-category-full" placeholder="Category Name" required/>
+                    //     <input type="text" name="content" id="add-item-full" placeholder="List Item" required/>
+                    //     <button>Create List Item</button>
+                    // </form>
 
 app.post('/users',async(req,res,next)=>{
     try{
@@ -66,7 +78,15 @@ app.get('/users/:name',async(req,res,next)=>{
                     <ul>
                     ${
                         categories.map(category=>{if(category.user.name === req.params.name){ return `
-                            <li><a href='/users/${req.params.name}/${category.name}'>${category.name}</a></li>
+                            <div class = "list-item-box">
+                                <li><a href='/users/${req.params.name}/${category.name}'>${category.name}</a></li>
+                                <form class="delete-form" method='POST' action='/users/${req.params.name}/${category.id}?_method=DELETE'>
+                                    <button>X</button>
+                                </form>
+                                <form class = "complete-form">
+                                    <button><span>&#10003</span></button>
+                                </form>
+                            </div>
                         `}}).join('')
                     }
                     </ul>
@@ -83,6 +103,7 @@ app.get('/users/:name',async(req,res,next)=>{
     }
 });
 
+//add category
 app.post('/users/:name',async(req,res,next)=>{
     try{
         const user = await User.findOne({
@@ -90,11 +111,25 @@ app.post('/users/:name',async(req,res,next)=>{
                 name: req.params.name
             }
         });
-        //console.log(user.id);
         const newCat = await Category.create(req.body);
         newCat.userId = user.id;
-        newCat.save();
+        await newCat.save();
         res.redirect(`/users/${req.params.name}`);
+
+    }catch(ex){
+        next(ex);
+    }
+});
+
+//delete category: not working because the items under it are referencing the category. Cascade? Or delete children first
+app.delete('/users/:name/:id',async(req,res,next)=>{
+    try{
+        const cat = await Category.findOne({
+            where: { id: req.params.id }
+        });
+        // console.log(cat);
+        // await cat.destroy();
+        // res.redirect(`/users/${req.params.name}/${req.params.id}`);
 
     }catch(ex){
         next(ex);
@@ -129,7 +164,15 @@ app.get('/users/:name/:catname',async(req,res,next)=>{
                         items.map(item=>{
                             if(item.category.user.name === req.params.name && item.category.name === req.params.catname){
                             return `
-                            <li>${item.content}</li>
+                            <div class="list-item-box">
+                                <li>${item.content}</li>
+                                <form class = "delete-form" method='POST' action='/users/${req.params.name}/${req.params.catname}/${item.id}?_method=DELETE'>
+                                    <button>X</button>
+                                </form>
+                                <form class = "complete-form">
+                                    <button><span>&#10003</span></button>
+                                <form>
+                            </div>
                         `}}).join('')
                     }
                     </ul>
@@ -140,6 +183,39 @@ app.get('/users/:name/:catname',async(req,res,next)=>{
                 </body>
             </html>
         `);
+
+    }catch(ex){
+        next(ex);
+    }
+});
+
+//Create list items
+app.post('/users/:name/:catname',async(req,res,next)=>{
+    try{
+        const category = await Category.findOne({
+            where: {
+                name: req.params.catname
+            }
+        });
+        const newItem = await Item.create(req.body);
+        newItem.categoryId = category.id;
+        await newItem.save();
+        res.redirect(`/users/${req.params.name}/${req.params.catname}`);
+
+    }catch(ex){
+        next(ex);
+    }
+});
+
+//destroy list items
+app.delete('/users/:name/:catname/:id',async(req,res,next)=>{
+    try{
+        const deleteThis = await Item.findOne({
+            where: { id: req.params.id }
+        });
+        console.log(deleteThis);
+        await deleteThis.destroy();
+        res.redirect(`/users/${req.params.name}/${req.params.catname}`);
 
     }catch(ex){
         next(ex);
