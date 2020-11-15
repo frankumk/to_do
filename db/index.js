@@ -1,6 +1,6 @@
-const pg = require('pg');
-const { STRING, BOOLEAN } = require('sequelize');
 const Sequelize = require('sequelize');
+const { STRING, BOOLEAN } = Sequelize;
+
 const db = new Sequelize(process.env.DATABASE_URL || 'postgres://localhost/to_do_db');
 
 const User = db.define('user',{

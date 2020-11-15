@@ -1,3 +1,13 @@
-.body{
-    font-family: "Lucida Console";
+*{
+    box-sizing: border-box;
+}
+body{
+    font-family: "Lucida Grande",arial,sans-serif;
+}
+button{
+    background-color: #FF007F;
+    color: white;
+}
+button:hover{
+    cursor:pointer;
 }
