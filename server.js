@@ -127,7 +127,6 @@ app.delete('/users/:name/:id',async(req,res,next)=>{
         const cat = await Category.findOne({
             where: { id: req.params.id }
         });
-        console.log(cat);
         await cat.destroy();
         res.redirect(`/users/${req.params.name}`);
 
@@ -162,14 +161,18 @@ app.get('/users/:name/:catname',async(req,res,next)=>{
                     <ul>
                     ${
                         items.map(item=>{
+                            let style='';
+                            if(item.complete===true){
+                                style='text-decoration: line-through'
+                            }
                             if(item.category.user.name === req.params.name && item.category.name === req.params.catname){
                             return `
                             <div class="list-item-box">
-                                <li>${item.content}</li>
+                                <li style="${style}">${item.content}</li>
                                 <form class = "delete-form" method='POST' action='/users/${req.params.name}/${req.params.catname}/${item.id}?_method=DELETE'>
                                     <button>X</button>
                                 </form>
-                                <form class = "complete-form">
+                                <form class = "complete-form" method="POST" action='/users/${req.params.name}/${req.params.catname}/${item.id}?_method=PUT'>
                                     <button><span>&#10003</span></button>
                                 <form>
                             </div>
@@ -177,9 +180,12 @@ app.get('/users/:name/:catname',async(req,res,next)=>{
                     }
                     </ul>
                     <form id="user-form" method="POST">
-                        <input type="text" name="content" id="add-item" required/>
+                        <input type="text" name="content" id="add-item" >
                         <button>Create New Item</button>
                     </form>
+                    <script>
+
+                    </script>
                 </body>
             </html>
         `);
@@ -220,6 +226,21 @@ app.delete('/users/:name/:catname/:id',async(req,res,next)=>{
     }catch(ex){
         next(ex);
     }
+});
+
+//Updating item to complete when user clicks check mark, so that they can get strikethrough style
+app.put('/users/:name/:catname/:id',async(req,res,next)=>{
+    try{  
+        const completed = await Item.findByPk(req.params.id);
+        console.log(completed);
+        await completed.update({
+            complete: true
+        });
+        res.redirect(`/users/${req.params.name}/${req.params.catname}`);
+    }catch(ex){
+        next(ex);
+    }
+
 });
 
 

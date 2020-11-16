@@ -32,7 +32,7 @@ const Item = db.define('item',{
 Category.belongsTo(User);
 User.hasMany(Category);
 
-Item.belongsTo(Category, {onDelete: 'cascade'});
+Item.belongsTo(Category, {onDelete: 'cascade', onUpdate: 'cascade'});
 Category.hasMany(Item);
 
 // Item.belongsTo(User);
