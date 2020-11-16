@@ -33,11 +33,6 @@ app.get('/users',async(req,res,next)=>{
                         <input type="text" name="name" id="add-user" placeholder="User Name" required/>
                         <button>Create New User</button>
                     </form>
-                    
-                    <form id="complete-item-form" method="POST">
-                        <h4>OR Add All From Homepage (not working yet)</h4>
-
-                    </form>
 
                 </body>
             </html>
@@ -64,7 +59,7 @@ app.post('/users',async(req,res,next)=>{
     }
 });
 
-// replace with app.use('/users',require('./routes/users'));
+// replace with app.use('/users',require('./routes/users/:name'));
 app.get('/users/:name',async(req,res,next)=>{
     try{
         const categories = await Category.findAll({
@@ -164,7 +159,7 @@ app.put('/users/:name/:id',async(req,res,next)=>{
 });
 
 
-// replace with app.use('/categories',require('./routes/categories'));
+// replace with app.use('/categories',require('./routes/:name/:catname'));
 app.get('/users/:name/:catname',async(req,res,next)=>{
     try{
         //res.send(req.params);
@@ -188,7 +183,7 @@ app.get('/users/:name/:catname',async(req,res,next)=>{
                         <a href='/users/${req.params.name}'>Back</a>
                      |   <a href='/users'>Home</a>
                     </nav>
-                    <h1>${req.params.name}'s ${req.params.catname} Tracker</h1>
+                    <h1>${req.params.name}s ${req.params.catname} Tracker</h1>
                     <h2>List</h2>
                     <ul>
                     ${
@@ -201,18 +196,18 @@ app.get('/users/:name/:catname',async(req,res,next)=>{
                             return `
                             <div class="list-item-box">
                                 <li style="${style}">${item.content}</li>
-                                <form class = "delete-form" method='POST' action='/users/${req.params.name}/${req.params.catname}/${item.id}?_method=DELETE'>
+                                <form class = "delete-form" method="POST" action="/users/${req.params.name}/${req.params.catname}/${item.id}?_method=DELETE">
                                     <button>X</button>
                                 </form>
-                                <form class = "complete-form" method="POST" action='/users/${req.params.name}/${req.params.catname}/${item.id}?_method=PUT'>
+                                <form class = "complete-form" method="POST" action="/users/${req.params.name}/${req.params.catname}/${item.id}?_method=PUT">
                                     <button><span>&#10003</span></button>
-                                <form>
+                                </form>
                             </div>
                         `}}).join('')
                     }
                     </ul>
                     <form id="user-form" method="POST">
-                        <input type="text" name="content" id="add-item" >
+                        <input type="text" name="content" id="add-item" required />
                         <button>Create New Item</button>
                     </form>
                     <script>
@@ -230,6 +225,7 @@ app.get('/users/:name/:catname',async(req,res,next)=>{
 //Create list items
 app.post('/users/:name/:catname',async(req,res,next)=>{
     try{
+        console.log(req.params.catname);
         const category = await Category.findOne({
             where: {
                 name: req.params.catname
