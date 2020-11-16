@@ -15,6 +15,10 @@ const Category = db.define('category',{
     name: {
         type: STRING,
         allowNull: false,
+    },
+    complete: {
+        type: BOOLEAN,
+        defaultValue: false
     }
 });
 

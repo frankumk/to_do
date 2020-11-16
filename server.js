@@ -77,17 +77,23 @@ app.get('/users/:name',async(req,res,next)=>{
                     <h2>${req.params.name}'s Categories</h2>
                     <ul>
                     ${
-                        categories.map(category=>{if(category.user.name === req.params.name){ return `
-                            <div class = "list-item-box">
-                                <li><a href='/users/${req.params.name}/${category.name}'>${category.name}</a></li>
-                                <form class="delete-form" method='POST' action='/users/${req.params.name}/${category.id}?_method=DELETE'>
-                                    <button>X</button>
-                                </form>
-                                <form class = "complete-form">
-                                    <button><span>&#10003</span></button>
-                                </form>
-                            </div>
-                        `}}).join('')
+                        categories.map(category=>{
+                            let style='';
+                            if(category.complete===true){
+                                style='text-decoration: line-through'
+                            }
+                            if(category.user.name === req.params.name){ 
+                                return `
+                                <div class = "list-item-box">
+                                    <li style="${style}"><a href='/users/${req.params.name}/${category.name}'>${category.name}</a></li>
+                                    <form class="delete-form" method='POST' action='/users/${req.params.name}/${category.id}?_method=DELETE'>
+                                        <button>X</button>
+                                    </form>
+                                    <form class = "complete-form" method="POST" action='/users/${req.params.name}/${category.id}?_method=PUT'>
+                                        <button><span>&#10003</span></button>
+                                    </form>
+                                </div>
+                            `}}).join('')
                     }
                     </ul>
                     <form id="cat-form" method="POST">
@@ -134,6 +140,21 @@ app.delete('/users/:name/:id',async(req,res,next)=>{
         next(ex);
     }
 });
+
+//Updating category to complete when user clicks check mark, so that they can get strikethrough style plus strikethrough descendents
+app.put('/users/:name/:id',async(req,res,next)=>{
+    try{  
+        const completed = await Category.findByPk(req.params.id);
+        await completed.update({
+            complete: true
+        });
+        res.redirect(`/users/${req.params.name}`);
+    }catch(ex){
+        next(ex);
+    }
+
+});
+
 
 // replace with app.use('/categories',require('./routes/categories'));
 app.get('/users/:name/:catname',async(req,res,next)=>{
@@ -232,7 +253,6 @@ app.delete('/users/:name/:catname/:id',async(req,res,next)=>{
 app.put('/users/:name/:catname/:id',async(req,res,next)=>{
     try{  
         const completed = await Item.findByPk(req.params.id);
-        console.log(completed);
         await completed.update({
             complete: true
         });
