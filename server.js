@@ -10,7 +10,11 @@ app.use(require('method-override')('_method'));
 
 app.get('/users',async(req,res,next)=>{
     try{
-        const users = await User.findAll();
+        const users = await User.findAll({
+            order: [
+                ['name']
+            ]
+        });
         res.send(`
             <!DOCTYPE html>
             <html>
@@ -30,9 +34,10 @@ app.get('/users',async(req,res,next)=>{
                         <button>Create New User</button>
                     </form>
                     
+                    <form id="complete-item-form" method="POST">
+                        <h4>OR Add All From Homepage (not working yet)</h4>
 
-
-
+                    </form>
 
                 </body>
             </html>
@@ -63,7 +68,10 @@ app.post('/users',async(req,res,next)=>{
 app.get('/users/:name',async(req,res,next)=>{
     try{
         const categories = await Category.findAll({
-            include: [User]
+            include: [User],
+            order: [
+                ['name']
+            ]
         });
         res.send(`
             <!DOCTYPE html>
@@ -166,7 +174,10 @@ app.get('/users/:name/:catname',async(req,res,next)=>{
                 include: {
                     model: User
                 }
-            }
+            },
+            order: [
+                ['content']
+            ]
         });
         res.send(`
             <!DOCTYPE html>
