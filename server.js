@@ -121,15 +121,15 @@ app.post('/users/:name',async(req,res,next)=>{
     }
 });
 
-//delete category: not working because the items under it are referencing the category. Cascade? Or delete children first
+//delete category, deletes all items under it, and redirects to categories page
 app.delete('/users/:name/:id',async(req,res,next)=>{
     try{
         const cat = await Category.findOne({
             where: { id: req.params.id }
         });
-        // console.log(cat);
-        // await cat.destroy();
-        // res.redirect(`/users/${req.params.name}/${req.params.id}`);
+        console.log(cat);
+        await cat.destroy();
+        res.redirect(`/users/${req.params.name}`);
 
     }catch(ex){
         next(ex);

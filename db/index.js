@@ -14,14 +14,14 @@ const User = db.define('user',{
 const Category = db.define('category',{
     name: {
         type: STRING,
-        allowNull: false
+        allowNull: false,
     }
 });
 
 const Item = db.define('item',{
     content: {
         type: STRING,
-        allowNull: false,
+        allowNull: false
     },
     complete: {
         type: BOOLEAN,
@@ -32,7 +32,7 @@ const Item = db.define('item',{
 Category.belongsTo(User);
 User.hasMany(Category);
 
-Item.belongsTo(Category);
+Item.belongsTo(Category, {onDelete: 'cascade'});
 Category.hasMany(Item);
 
 // Item.belongsTo(User);
